@@ -9,9 +9,6 @@ with open(filename, 'rb') as myfile:
   for row in reader:
     ratings_array.append(row)
 
-print(len(ratings_array))
-print(ratings_array[13915])
-
 def dict_order(char):
   if char == " ":
     return 0
@@ -68,33 +65,57 @@ def dict_order(char):
   if char == "Z" or char == "z":
     return 26
 
+# dict_compare output:
+# 1 means str1 < str2;
+# 0 means str1 = str2
+# -1 means str1 > str2 (in alphabetic dictionary order)
 def dict_compare(str1, str2):
-  if str1.is_empty():
+  if not str1:
+    if not str2:
+      return 0
+    return 1
+  if not str2:
+    return -1
+  if dict_order(str1[0]) < dict_order(str2[0]):
+    return 1
+  elif dict_order(str1[0]) > dict_order(str2[0]):
+    return -1
+  else:
+    return dict_compare(str1[1:], str2[1:])
 
 def dict_lookup_aux(str, first, last):
-  #if low > high: # termination case  
-    #return -1  
-  #middle = (low + high) / 2 # gets the middle of the array  
-  #if array[middle] == key:  # if the middle is our key  
-    #return middle  
-  #elif key < array[middle]: # our key might be in the left sub-array  
-    #return binarySearch(array, key, low, middle-1)  
-  #else:                     # our key might be in the right sub-array  
-    #return binarySearch(array, key, middle+1, high) 
-  return 0
+  if last - first <= 1:
+    if str == ratings_array[first][1]:
+      return first
+    elif str == ratings_array[last][1]:
+      return last
+    else:
+      return 0
+  mid = (last + first)/2
+  if str == ratings_array[mid][1]:
+    return mid
+  elif dict_compare(str, ratings_array[mid][1]) == 1:
+    return dict_lookup_aux(str, first, mid-1)
+  else:
+    return dict_lookup_aux(str, mid+1, last)
 
 # binary search for index 1 to len(ratings_array); returns 0 if not found
 def dict_lookup(str):
-  return dict_lookup_aux(str, 1, 13916)
+  return dict_lookup_aux(str.lower(), 1, 13915)
 
 def sent(twt):
+  foundcount = 0
   result = [0,0,0]
   bagofwords = re.sub("[^\w]", " ",  twt).split()
+  print(bagofwords)
   for word in bagofwords:
     index = dict_lookup(word)
-    result[0] = result[0] + ratings_array[index][1]
-    result[1] = result[1] + ratings_array[index][4]
-    result[2] = result[2] + ratings_array[index][7]
-  for i in xrange(0,3):
-    result[i] = result[i]/float(len(bagofwords))
+    if index > 0:
+      foundcount +=1 
+      result[0] = result[0] + float(ratings_array[index][2])
+      result[1] = result[1] + float(ratings_array[index][5])
+      result[2] = result[2] + float(ratings_array[index][8])
+  if foundcount > 0:
+    for i in xrange(0,3):
+      result[i] = result[i]/foundcount
   return result

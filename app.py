@@ -1,72 +1,77 @@
 #from TwitterSearch import *
 from twitter import *
+from flask import Flask, render_template, request, redirect, send_from_directory
 import auth
-import sys
-import csv
+import sent
+import sys, csv
+
+app = Flask(__name__)
+app.vars = {}
+#app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def main():
   return redirect('/index')
 
-
-latitude = 36.5333
-longitude = -82.5500
-max_range = 300 # kilometers
-num_results = 10
-outfile = "output.csv"
-
-lst = ['#StarWars']
-
-twitter = Twitter(auth=OAuth(auth.at, auth.ats, auth.ck, auth.cs))
-
-csvfile = file(outfile, "w")
-csvwriter = csv.writer(csvfile)
-row = ["user", "test", "latitude", "longitude"]
-csvwriter.writerow(row)
-result_count = 0
-last_id = None
-while result_count < num_results:
-  query = twitter.search.tweets(q = lst[0], geocode = "%f,%f,%dkm" % (latitude, longitude, max_range), count = 100, max_id = last_id)
-  for result in query["statuses"]:
-    if result["geo"]:
-      user = result["user"]["screen_name"]
-      text = result["text"]
-      text = text.encode('ascii', 'replace')
-      latitude = result["geo"]["coordinates"][0]
-      longitude = result["geo"]["coordinates"][1]
-      row = [user, text, latitude, longitude]
-      csvwriter.writerow(row)
-      result_count = result_count + 1
-    last_id = result["id"]
-  print "got %d results" % result_count
-
-csvfile.close()
-
-print "written to %s" % outfile
-
-
-
 @app.route('/index', methods=['GET', 'POST'])
 def index():
   if request.method == 'GET': 
     return render_template('index.html')
-  else: # request.method == 'POST'
-    app.vars['stock'] = request.form['ticker']
-    app.vars['choice'] = request.form['features']
-    #r = Quandl.get("WIKI/"+app.vars['stock'], returns=pandas)
-    j = requests.get('https://www.quandl.com/api/v3/datasets/WIKI/' + app.vars['stock'] +'.csv?api_key=sJN4VTedn6CE_mZ-6LrM')
-    jprime = j.content
-    r = pandas.read_csv(StringIO(jprime))
-    now = time.time()
-    num_points = r.shape[0]
-    dt = 24*3600 # days in seconds
-    dates = np.linspace(now, now + num_points*dt, num_points) * 1000 # times in ms
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
-    #output_file("plot.html", title = app.vars['stock']+" prices")
-    f = figure(x_axis_label='date', x_axis_type="datetime",tools=TOOLS)
-    f.line(dates, r[app.vars['choice']], color='#1F78B4', legend=app.vars['stock'])
-    script, div = components(f)
-    return render_template('result.html', script=script, div = div, stock = app.vars['stock'])
+  else:
+    app.vars['city'] = request.form['city']
+    if app.vars['city'] == 'Chicago':
+      app.vars['latitude'] = 41.837
+      app.vars['longitude'] = -87.685
+    if app.vars['city'] == 'LosAngeles':
+      app.vars['latitude'] = 34.05
+      app.vars['longitude'] = -118.25
+    if app.vars['city'] == 'NewYork':
+      app.vars['latitude'] = 40.79
+      app.vars['longitude'] = -73.96
+    if app.vars['city'] == 'SanFrancisco':
+      app.vars['latitude'] = 37.78
+      app.vars['longitude'] = -122.417
+    max_range = 20 # kilometers
+    num_results = 10
+    outfile = "output.csv"
+    search = request.form['key']
+    twitter = Twitter(auth=OAuth(auth.at, auth.ats, auth.ck, auth.cs))
+    csvfile = file(outfile, "w")
+    csvwriter = csv.writer(csvfile)
+    row = ["user", "text", "latitude", "longitude"]
+    csvwriter.writerow(row)
+    result_count = 0
+    last_id = None
+    while result_count < num_results:
+      query = twitter.search.tweets(q = search, geocode = "%f,%f,%dkm" % (
+        app.vars['latitude'], app.vars['longitude'], max_range), count = 100, max_id = last_id)
+      for result in query["statuses"]:
+        if result["geo"]:
+          user = result["user"]["screen_name"]
+          text = result["text"]
+          text = text.encode('ascii', 'replace')
+          latitude = result["geo"]["coordinates"][0]
+          longitude = result["geo"]["coordinates"][1]
+          row = [user, text, latitude, longitude]
+          csvwriter.writerow(row)
+          result_count = result_count + 1
+        last_id = result["id"]
+      print "got %d results" % result_count
+    csvfile.close()
+    v = 0
+    a = 0
+    d = 0
+    with open('output.csv', 'rb') as csvfile:
+      myreader = csv.reader(csvfile)
+      for row in myreader:
+        sentiment_score = sent.sent(row[1])
+        v += sentiment_score[0]
+        a += sentiment_score[1]
+        d += sentiment_score[2]
+    v = v/float(result_count)
+    a = a/float(result_count)
+    d = d/float(result_count)
+    return render_template('result.html', val = v, aro = a, dom = d)
 
 
 @app.route('/result', methods=['GET'])
