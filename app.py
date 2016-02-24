@@ -4,7 +4,7 @@ from cartodb import CartoDBAPIKey, CartoDBException, FileImport
 from flask import Flask, render_template, request, redirect, send_from_directory
 import execjs
 import auth
-from bokeh.io import hplot, output_file, show
+from bokeh.io import hplot, gridplot, output_file, show
 from bokeh.plotting import figure
 from bokeh.embed import components
 import matplotlib.mlab as mlab
@@ -50,19 +50,6 @@ def index():
     cities.append(['Washington D.C.', 38.905, -77.016])
     cities.append(['Boston', 42.36, -71.06])
     cities.append(['Miami', 25.775, -80.21])
-    app.vars['city'] = request.form['city']
-    if app.vars['city'] == 'Chicago':
-      app.vars['latitude'] = 41.837
-      app.vars['longitude'] = -87.685
-    if app.vars['city'] == 'LosAngeles':
-      app.vars['latitude'] = 34.05
-      app.vars['longitude'] = -118.25
-    if app.vars['city'] == 'NewYork':
-      app.vars['latitude'] = 40.79
-      app.vars['longitude'] = -73.96
-    if app.vars['city'] == 'SanFrancisco':
-      app.vars['latitude'] = 37.78
-      app.vars['longitude'] = -122.417
     max_range = 500 # kilometers
     num_results = 20
     outfile = "outputpa.csv"
@@ -148,28 +135,36 @@ def index():
     #plt.hist(vlist, bins=bins, alpha=0.5)
     #plt.title('Valence')
     #plt.show()
-    p1 = figure(title="Valence",tools="save",
-           background_fill="#E8DDCB")
+    p1 = figure(title="Valence",tools="pan,wheel_zoom,box_zoom,reset,resize,previewsave",
+            plot_width=300,plot_height=300,background_fill_color="#E8DDCB")
     hist1, edges1 = np.histogram(vlist, density=True, bins=50)
     p1.quad(top=hist1, bottom=0, left=edges1[:-1], right=edges1[1:],
          fill_color="#036564", line_color="#033649")
-    p2 = figure(title="Arousal",tools="save",
-           background_fill="#E8DDCB")
-    hist2, edges2 = np.histogram(vlist, density=True, bins=50)
+    p2 = figure(title="Arousal",tools="pan,wheel_zoom,box_zoom,reset,resize,previewsave",
+           plot_width=300,plot_height=300,background_fill_color="#E8DDCB")
+    hist2, edges2 = np.histogram(alist, density=True, bins=50)
     p2.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:],
          fill_color="#036564", line_color="#033649")
-    p3 = figure(title="Dominance",tools="save",
-           background_fill="#E8DDCB")
-    hist3, edges3 = np.histogram(vlist, density=True, bins=50)
+    p3 = figure(title="Dominance",tools="pan,wheel_zoom,box_zoom,reset,resize,previewsave",
+           plot_width=300,plot_height=300,background_fill_color="#E8DDCB")
+    hist3, edges3 = np.histogram(dlist, density=True, bins=50)
     p3.quad(top=hist2, bottom=0, left=edges3[:-1], right=edges3[1:],
          fill_color="#036564", line_color="#033649")
     tri = gridplot([[p1, p2, p3]])
     script, my_plot_div = components(tri)
-    return render_template('result.html', script = script, div=my_plot_div)
+    return render_template('result.html', script = script, my_div=my_plot_div)
 
 @app.route('/result', methods=['GET'])
 def result():
-  return render_template('result.html')
+    return render_template('result.html')
+  
+@app.route('/superbowl', methods=['GET'])
+def superbowl():
+    return render_template('superbowl.html')
+
+@app.route('/about', methods=['GET'])
+def about():
+    return render_template('about.html')
 
 if __name__ == '__main__':
   app.run(port=5000, debug=True)

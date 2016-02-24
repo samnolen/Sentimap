@@ -3,17 +3,51 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Twitter Sentimap - by Sam Nolen</title>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.11.1.min.css" type="text/css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		   <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.11.1.min.js"></script>
 	</head>
+	
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    <!-- Brand and toggle get grouped for better mobile display -->
+	    <div class="navbar-header">
+	      <!-- <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button> -->
+	      <a class="navbar-brand" href="#">Twitter Sentimap</a>
+	    </div>
+
+	    <!-- Collect the nav links, forms, and other content for toggling -->
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav navbar-left">
+	        <li class="active"><a href="#">Try it! <span class="sr-only">(current)</span></a></li>
+			<li><a href="superbowl">Super</a></li>
+			<li><a href="about">About</a></li>
+	      </ul>
+	      <ul class="nav navbar-nav navbar-right">
+	        <li><a href="www.samnolen.com">Sam Nolen</a></li>
+	      </ul>
+	    </div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+	
 	<body>
-		<div>
-  			<h1>Results:</h1>
-            <p>Valence: {{val}}<br>
-            Arousal: {{aro}}<br>
-            Domination: {{dom}}</p>
-            <p><a href="/index">Back</a></p>
+		<div class="container-fluid">
+			<h2> VAD for Twitter Corpus </h2>
+			{{script | safe}}
+			{{my_div | safe}}
 		</div>
+		<div class="container-fluid">
+			<p>Try another <a href="search">search</a> or read about what's happening 
+				<a href="about">here</a>.</p>
+		</div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.js"></script>
 	</body>
 </html>
