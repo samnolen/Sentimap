@@ -106,8 +106,11 @@ def dict_lookup(str):
 def sent(twt):
   foundcount = 0
   result = [0,0,0]
-  bagofwords = re.sub("[^\w]", " ",  twt).split()
-  print(bagofwords)
+  try:
+    bagofwords = re.sub("[^\w]", " ",  twt).split()
+  except TypeError:
+    print twt
+    bagofwords = []
   for word in bagofwords:
     index = dict_lookup(word)
     if index > 0:
